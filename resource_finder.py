@@ -73,6 +73,27 @@ class ResourceFinder(object):
 				for name in unused_resource_names:
 					print(name)
 
+	def delete_unused_resources(self, force = False):
+
+		for res_type in self.exist_resources.get_contain_types():
+			resources = self.exist_resources.get_resources(res_type)
+			unused_resources = []
+			for resource in resources:
+				if resource.used == False:
+					unused_resources.append(resource)
+			if len(unused_resources) > 0:
+				if force:
+					for resource in unused_resources:
+						os.remove(resource.get_full_path())
+				else:
+					for resource in unused_resources:
+						print("\n\n=== ", res_type, "/", resource.resource_name, " ===")
+						print(resource.get_full_path())
+						# input_str = resource.resource_name + " ( " + resource.get_full_path() + " ) | delete ? (y/N)"
+						if input("delete ? (y/N) : ") == "y":
+							os.remove(resource.get_full_path())
+
+		
 
 	def __find_resources_in_java(self, java_file):
 		with open(java_file.get_full_path()) as f:
@@ -90,6 +111,11 @@ class ResourceFinder(object):
 			for line in f:
 				if bool(re.search(search_re, line)):
 					for resource in re.findall('\WR\.\w*\.\w*', line):
+						if """//""" in line:
+							comment_index = line.index("""//""")
+							resource_index = line.index(resource)
+							if comment_index < resource_index:
+								continue
 						tokens = resource.split(".")
 						resource_type = tokens[-2]
 						resource_name = tokens[-1]
