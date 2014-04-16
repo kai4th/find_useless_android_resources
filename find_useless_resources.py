@@ -23,5 +23,7 @@ os.system("clear")
 
 if input_str == "all":
 	finder.delete_unused_resources(True)
+elif input_str == "n":
+	pass
 else:
 	finder.delete_unused_resources()
